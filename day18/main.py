@@ -57,11 +57,11 @@ def get_distance_to_keys(pos, keys, obtained_keys, apsp):
     return {k: len(apsp[pos][k]) -1 for k in keys.difference(obtained_keys) if can_reach(k, pos, obtained_keys, apsp)}
 
 def play_game(pos, obtained_keys: Set, keys: Set, apsp):
-    print("Game: {} - {} - {}".format(pos, obtained_keys, keys.difference(obtained_keys)))
+    print("Game: {} - {} - {}".format(pos, len(obtained_keys), len(keys.difference(obtained_keys))))
     if keys.issubset(obtained_keys):
         return 0
     reachable = get_distance_to_keys(pos, keys, obtained_keys, apsp)
-    distances = map(lambda x: reachable[x] + play_game(x, obtained_keys.union(set(x)), keys, apsp), reachable.keys())
+    distances = map(lambda x: reachable[x] + play_game(x, obtained_keys.union(set(apsp[pos][x]).intersection(keys)), keys, apsp), reachable.keys())
     return min(distances)
 
 

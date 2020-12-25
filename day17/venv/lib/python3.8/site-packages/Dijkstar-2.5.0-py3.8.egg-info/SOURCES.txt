@@ -1,0 +1,16 @@
+CHANGELOG.rst
+MANIFEST.in
+README.rst
+setup.cfg
+setup.py
+Dijkstar.egg-info/PKG-INFO
+Dijkstar.egg-info/SOURCES.txt
+Dijkstar.egg-info/dependency_links.txt
+Dijkstar.egg-info/requires.txt
+Dijkstar.egg-info/top_level.txt
+dijkstar/__init__.py
+dijkstar/algorithm.py
+dijkstar/graph.py
+dijkstar/tests/__init__.py
+dijkstar/tests/test_algorithm.py
+dijkstar/tests/test_graph.py

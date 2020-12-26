@@ -1,8 +1,5 @@
-from typing import Set, Tuple
-
 import networkx as nx
 import itertools
-import functools
 import multiprocessing
 
 pool = multiprocessing.Pool()
@@ -54,13 +51,14 @@ def can_reach(target, source, obtained_keys):
     return False
 
 
-def get_reachable_keys(pos, obtained_keys, apsp):
-    global keys
-    return {k for k in keys if can_reach(k, pos, obtained_keys, apsp)}.difference(obtained_keys)
+def get_reachable_keys(pos, obtained_keys):
+    global keys, shortest_paths
+    return {k for k in keys if can_reach(k, pos, obtained_keys)}.difference(obtained_keys)
 
 
 def get_distance_to_keys(pos, obtained_keys, apsp):
-    return {k: len(apsp[pos][k]) - 1 for k in keys.difference(obtained_keys) if can_reach(k, pos, obtained_keys) and len(apsp[pos][k]) > 0}
+    return {k: len(apsp[pos][k]) - 1 for k in keys.difference(obtained_keys) if
+            can_reach(k, pos, obtained_keys) and len(apsp[pos][k]) > 0}
 
 
 def get_reachable_for_several_pos(positions, obtained_keys):
@@ -68,6 +66,8 @@ def get_reachable_for_several_pos(positions, obtained_keys):
     for i, pos in enumerate(positions):
         reachable[i] = get_distance_to_keys(pos, obtained_keys, shortest_paths)
     return reachable
+
+
 seen = {}
 
 

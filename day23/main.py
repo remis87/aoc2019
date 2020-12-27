@@ -1,4 +1,6 @@
 from threading import Thread, Lock
+import time
+
 
 class IntCodeProgram():
 
@@ -15,6 +17,7 @@ class IntCodeProgram():
         self.return_pointer = 0
         self.default_input = 0
         self.suspend = False
+        self.idle = False
 
     def run(self):
         pp = self.return_pointer
@@ -75,10 +78,6 @@ class IntCodeProgram():
         if isinstance(inp, int):
             self._write_to_memory(_program[pp + 1], inp, mode[2])
             return pp + 2
-        else:
-
-            self.suspend = True
-            return pp
 
     def opt4(self, _program, pp, mode):
         out = self._read_value(pp, 1, mode[2])
@@ -145,14 +144,21 @@ class Networker(IntCodeProgram):
         self.ipr = 0
         self.opr = 0
         self.input_mutex = Lock()
+        self.attempts = 0
 
     def _get_input(self):
         self.input_mutex.acquire()
         if self.ipr >= len(self.input):
+            if self.attempts > 4:
+                self.idle = True
+                self.attempts = 0
+            self.attempts += 1
             self.input_mutex.release()
             return -1
+        self.idle = False
         inp = self.input[self.ipr]
         self.ipr += 1
+        self.attempts = 0
         self.input_mutex.release()
         return inp
 
@@ -166,15 +172,57 @@ class Networker(IntCodeProgram):
 
         if len(self.output[self.opr:]) == 3:
             addr, x, y = self.output[self.opr], self.output[self.opr + 1], self.output[self.opr + 2]
-            print(self.name + " Sending {} {} {}".format(addr, x, y))
+            # print(self.name + " Sending {} {} {}".format(addr, x, y))
             computers[addr].add_input([x, y])
             self.opr += 3
         self.input_mutex.release()
+
+    def is_idle(self):
+        self.input_mutex.acquire()
+        idle = self.idle
+        self.input_mutex.release()
+        return idle
+
+
+class NAT:
+    def __init__(self):
+        self.x = -1
+        self.y = -1
+        self.last_sent = None
+        self.mutex = Lock()
+
+    def is_idle(self):
+        return True
+
+    def add_input(self, inp: []):
+        self.mutex.acquire()
+        print("NAT getting package: {}".format(inp))
+        self.x = inp[0]
+        self.y = inp[1]
+        self.mutex.release()
+
+    def check_idle(self):
+        print("NAT checking idle")
+        return all(map(lambda x: x.is_idle(), computers.values()))
+
+    def run(self):
+        print("starting NAT")
+        time.sleep(15)
+        while True:
+            if self.check_idle() and self.x > 0 and self.y > 0:
+                print("NAT sending package {}".format((self.x, self.y)))
+                if self.last_sent and self.last_sent[1] == self.y:
+                    print("********\n********\n********\n********\n********\n{}".format(self.last_sent))
+                computers[0].add_input([self.x, self.y])
+                self.last_sent = (self.x, self.y)
 
 
 computers = {}
 for i in range(50):
     computers[i] = Networker("n{}".format(i), 'input', [i])
+computers[255] = NAT()
+Thread(target=computers[255].run).start()
 for i in range(50):
     t = Thread(target=computers[i].run)
+    print("Starting {}".format(i))
     t.start()

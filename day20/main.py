@@ -56,7 +56,7 @@ def handle_letter(grid, r, c, g: nx.Graph):
                 for i in range(level):
                     if (n[0], n[1], i) not in g:
                         g.add_node((n[0], n[1], i))
-                if (letter, 0) in G:
+                if (letter, 0) in g:
                     letter = letter[::-1]
                 for i in range(level):
                     g.add_node((letter, i), outer=check_outer((r, c), grid))

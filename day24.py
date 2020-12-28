@@ -1,6 +1,7 @@
 def get_neighbor(r, c, d):
     neighbors = {(r - 1, c, d), (r + 1, c, d), (r, c - 1, d), (r, c + 1, d)}
-    neighbors = set(filter(lambda x: 0 <= x[0] < len(grid) and 0 <= x[1] < len(grid[r]), neighbors))
+    neighbors = set(filter(lambda x: 0 <= x[0] < len(
+        grid) and 0 <= x[1] < len(grid[r]), neighbors))
     if (2, 2, d) in neighbors:
         neighbors.remove((2, 2, d))
     if r == 0:
@@ -58,7 +59,6 @@ for row in range(len(grid)):
         else:
             empty.add((row, col, 0))
 
-print(print_bug_set(0))
 for _ in range(200):
     all_neighbors = set()
     for bug in bugs:
@@ -79,6 +79,4 @@ for _ in range(200):
             newly_infested.add(tile)
     bugs.difference_update(dead_bugs)
     bugs.update(newly_infested)
-print(bugs)
 print(len(bugs))
-print(print_bug_set(0))
